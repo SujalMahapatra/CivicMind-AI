@@ -26,6 +26,7 @@ This provides:
 """
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
+from typing import Literal
 
 
 class Settings(BaseSettings):
@@ -53,13 +54,19 @@ class Settings(BaseSettings):
     # =============================================================================
     APP_NAME: str = "CivicMind AI"
     API_VERSION: str = "1.0.0"
-    ENVIRONMENT: str = "development"
+    
+
+    ENVIRONMENT: Literal[
+        "development",
+        "staging",
+        "production"
+    ] = "development"
     DEBUG: bool = False
 
     # =============================================================================
     # AI SERVICE CONFIGURATION
     # =============================================================================
-    GEMINI_API_KEY: str = ""
+    GEMINI_API_KEY: str 
 
     # =============================================================================
     # DATABASE CONFIGURATION
@@ -78,7 +85,15 @@ class Settings(BaseSettings):
         # Ignore extra fields in .env that aren't defined in this class
         extra="ignore"
     )
+#Property_helper
+@property
+def is_production(self) -> bool:
+    return self.ENVIRONMENT == "production"
 
+#Future_model_config
+MAX_UPLOAD_SIZE_MB: int = 50
+
+DEFAULT_FORECAST_DAYS: int = 30
 
 # Create a singleton settings instance
 # This is imported throughout the application wherever configuration is needed.
@@ -87,3 +102,5 @@ class Settings(BaseSettings):
 #   print(settings.APP_NAME)  # -> "CivicMind AI"
 #   print(settings.DATABASE_URL)  # -> Value from .env or default
 settings: Settings = Settings()
+
+__all__ = ["settings", "Settings"]

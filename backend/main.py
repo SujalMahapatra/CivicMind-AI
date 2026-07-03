@@ -15,11 +15,14 @@ When you run this application (e.g., uvicorn main:app --reload):
 6. On each request, FastAPI matches the URL to a registered handler
 """
 
+from typing import Any
 from fastapi import FastAPI
 from fastapi.responses import JSONResponse
 
 from config import settings
-import health
+from api.health import router as health_router
+
+
 
 
 # =============================================================================
@@ -55,7 +58,7 @@ app = FastAPI(
         "url": "https://opensource.org/licenses/MIT",
     },
     # OpenAPI URL for documentation generation
-    openapi_url=f"/api/{settings.API_VERSION.split('.')[0]}/openapi.json",
+    openapi_url="/openapi.json",
     # Docs URL path
     docs_url="/docs" if settings.DEBUG else None,
     # Redoc URL path (alternative documentation UI)
@@ -78,9 +81,8 @@ app = FastAPI(
 # This means all routes defined in health.py will be prefixed with /api/v1
 # Example: health.py defines /health, accessible at /api/v1/health
 app.include_router(
-    health.router,
-    prefix=f"/api/{settings.API_VERSION.split('.')[0]}",
-    tags=["Health"]
+    health_router,
+    prefix="/api/v1"
 )
 
 
@@ -100,7 +102,8 @@ app.include_router(
     summary="Root endpoint",
     description="Returns a welcome message for the CivicMind AI API"
 )
-async def root() -> dict[str, str]:
+
+async def root() -> dict[str, Any]:
     """
     Root endpoint returning a welcome message.
 
