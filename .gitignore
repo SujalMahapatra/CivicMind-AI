@@ -103,3 +103,4 @@ temp/
 # Generated Reports
 # ==========================================
 reports/generated/
+.ideavo/project
