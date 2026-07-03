@@ -1,0 +1,105 @@
+# ==========================================
+# Python
+# ==========================================
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual Environments
+venv/
+.venv/
+env/
+ENV/
+
+# Python Packaging
+build/
+dist/
+*.egg-info/
+
+# ==========================================
+# Environment Variables
+# ==========================================
+.env
+.env.local
+.env.production
+.env.development
+
+# API Keys
+secrets/
+credentials/
+
+# ==========================================
+# Logs
+# ==========================================
+logs/
+*.log
+
+# ==========================================
+# FastAPI
+# ==========================================
+.coverage
+.pytest_cache/
+htmlcov/
+
+# ==========================================
+# Jupyter
+# ==========================================
+.ipynb_checkpoints/
+
+# ==========================================
+# Machine Learning
+# ==========================================
+models/*.pkl
+models/*.joblib
+models/*.h5
+models/*.pt
+models/*.pth
+
+# Large Datasets
+datasets/raw/
+datasets/large/
+
+# Vector Databases
+vector_db/
+chroma_db/
+
+# ==========================================
+# Node / React
+# ==========================================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# React Build
+frontend/build/
+frontend/dist/
+
+# ==========================================
+# IDE
+# ==========================================
+.vscode/
+.idea/
+
+# ==========================================
+# OS Files
+# ==========================================
+.DS_Store
+Thumbs.db
+
+# ==========================================
+# Docker
+# ==========================================
+.docker/
+
+# ==========================================
+# Temporary Files
+# ==========================================
+tmp/
+temp/
+*.tmp
+
+# ==========================================
+# Generated Reports
+# ==========================================
+reports/generated/
