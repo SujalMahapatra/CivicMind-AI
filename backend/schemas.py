@@ -1,16 +1,27 @@
 """
 CivicMind AI - Pydantic Schemas
 
-This module defines Pydantic models for the Coordinator Agent data structures.
-Pydantic is Python's most widely-used data validation library that uses type hints
-to define schemas, perform validation, and enable JSON serialization.
+This module defines all Pydantic data models used throughout the CivicMind AI
+application. Pydantic provides data validation and settings management using
+Python type hints, making it easy to define data structures that are both
+validatable and serializable.
 
-PYDANTIC V2 SYNTAX:
-This file uses Pydantic V2 syntax, which differs from V1 in several ways:
-- model_config is a ConfigDict or class attribute
-- Field types use Pydantic's Field() function instead of FieldInfo
-- Validation is separate from schema generation
-- Use model_validator and field_validator instead of root_validator/validator
+PYDANTIC V2 BEST PRACTICES:
+--------------------------
+This file follows Pydantic V2 syntax patterns:
+
+1. ConfigDict: Use model_config = ConfigDict(...) instead of class Config
+2. Field Validation: Use Field() for constraints, descriptions, and examples
+3. Type Hints: Always specify field types for IDE support and validation
+4. Enums: Use Python Enums for constrained string values
+5. JSON Schema: Use json_schema_extra for OpenAPI documentation
+
+EDUCATIONAL NOTES:
+----------------
+- BaseModel: Core class for creating data schemas with validation
+- Field: Adds metadata, constraints, and validation rules
+- ConfigDict: Model-level configuration options
+- Validation: Pydantic validates data automatically on instantiation
 """
 
 from enum import Enum
@@ -22,24 +33,12 @@ from pydantic import BaseModel, Field, ConfigDict
 # =============================================================================
 # ENUMERATIONS
 # =============================================================================
-# Enums (enumerations) define a fixed set of named values. Using enums instead
-# of plain strings ensures type safety, allows IDE autocomplete, and prevents
-# invalid values from being passed.
-
+# Enums define a fixed set of named values. Using enums instead of plain
+# strings ensures type safety, allows IDE autocomplete, and prevents invalid
+# values from being passed at runtime.
 
 class Domain(Enum):
-    """
-    Domain categories for CivicMind AI queries.
-    
-    CivicMind AI categorizes all user queries into domains to route them
-    to specialized agents with relevant expertise.
-    
-    Attributes:
-        health: Public health and wellness topics (hospitals, disease tracking)
-        environment: Sustainability and eco topics (air quality, pollution)
-        mobility: Transportation and urban planning (traffic, infrastructure)
-        unknown: When classification cannot determine domain
-    """
+    """Domain categories for CivicMind AI queries."""
     health = "health"
     environment = "environment"
     mobility = "mobility"
@@ -47,20 +46,7 @@ class Domain(Enum):
 
 
 class Intent(Enum):
-    """
-    User intent categories for CivicMind AI queries.
-    
-    Intent classification determines what the user wants to achieve - whether
-    they want data analysis, forecasting, or specific recommendations.
-    
-    Attributes:
-        analytics: Analyze current/past data for insights
-        prediction: Forecast future trends and outcomes
-        recommendation: Get actionable suggestions
-        report: Generate comprehensive documents
-        knowledge: Learn about a topic (RAG-based answers)
-        unknown: When intent cannot be determined
-    """
+    """User intent categories for CivicMind AI queries."""
     analytics = "analytics"
     prediction = "prediction"
     recommendation = "recommendation"
@@ -70,128 +56,30 @@ class Intent(Enum):
 
 
 # =============================================================================
-# PYDANTIC MODELS
+# REQUEST MODELS (Input Validation)
 # =============================================================================
-# Pydantic BaseModel is the core class for creating data schemas. It provides:
-# - Automatic JSON serialization/deserialization
-# - Type validation before assignment
-# - Clear error messages when validation fails
-# - IDE support through type hints
+# Request models validate incoming API data before processing.
 
 
 class RouteRequest(BaseModel):
     """
     Request model for routing a user query to the appropriate agent.
     
-    This model captures the raw user input that needs to be analyzed
-    and routed to specialized agents based on domain and intent.
-    
-    Attributes:
-        query: The natural language query from the user
-        
-    Example:
-        >>> route_request = RouteRequest(query="What is the air quality forecast?")
-        >>> print(route_request.query)
-        "What is the air quality forecast?"
-        
-    Validation:
-        - query: Must be non-empty string, max 10000 chars
+    Captures the raw user input that needs to be analyzed and routed
+    to specialized agents based on domain and intent classification.
     """
-    
-    # The user's natural language query
-    # Using Field() allows us to add metadata, validation constraints, and descriptions
     query: str = Field(
-        ...,  # Ellipsis means this field is required
+        ...,  # Required field (no default)
         min_length=1,
         max_length=10000,
-        description="Natural language query to be routed to appropriate agent",
-        examples=["What is the air quality forecast for tomorrow?"]
+        description="Natural language query from the user"
     )
     
-    # Pydantic V2: Use model_config for additional configuration
-    # strip_whitespace removes leading/trailing whitespace during validation
     model_config: ConfigDict = ConfigDict(
         str_strip_whitespace=True,
         json_schema_extra={
             "example": {
-                "query": "What is the air quality forecast for tomorrow?"
-            }
-        }
-    )
-
-
-class RouteResponse(BaseModel):
-    """
-    Response model containing routing decision from Coordinator Agent.
-    
-    After the Coordinator Agent analyzes the user's query, this model
-    represents the routing decision indicating which specialized agent
-    should handle the request.
-    
-    Attributes:
-        domain: The domain category of the query
-        intent: The user's intent/what they want to achieve
-        target_agent: Name of the agent selected to handle this request
-        confidence: Confidence score (0.0 to 1.0) for the routing decision
-        
-    Example:
-        >>> response = RouteResponse(
-        ...     domain=Domain.environment,
-        ...     intent=Intent.prediction,
-        ...     target_agent="prediction_agent",
-        ...     confidence=0.95
-        ... )
-        
-    Validation:
-        - confidence: Must be between 0.0 and 1.0
-    """
-    
-    # Domain classification: health, environment, mobility, or unknown
-    domain: Domain = Field(
-        ...,  # Required field
-        description="Classified domain for the query",
-        examples=[Domain.environment]
-    )
-    
-    # Intent classification: what the user wants to do
-    intent: Intent = Field(
-        ...,  # Required field
-        description="Classified intent for the query",
-        examples=[Intent.prediction]
-    )
-    
-    # Target agent name (e.g., "analytics_agent", "prediction_agent")
-    target_agent: str = Field(
-        ...,  # Required field
-        min_length=1,
-        max_length=100,
-        description="Name of the agent selected to handle this request",
-        examples=["prediction_agent"]
-    )
-    
-    # Confidence score (0.0 to 1.0) of the routing decision
-    # Higher values indicate more confident classification
-    confidence: float = Field(
-        ...,  # Required field
-        ge=0.0,  # Greater than or equal to 0.0
-        le=1.0,  # Less than or equal to 1.0
-        description="Confidence score (0.0 to 1.0) of the routing decision",
-        examples=[0.95]
-    )
-    
-    # Pydantic V2: Configuration for this model
-    model_config: ConfigDict = ConfigDict(
-        # Enable serialization of enum values directly
-        use_enum_values=True,
-        # Allow population by name (e.g., domain="health")
-        populate_by_name=True,
-        # JSON example for documentation
-        json_schema_extra={
-            "example": {
-                "domain": "environment",
-                "intent": "prediction",
-                "target_agent": "prediction_agent",
-                "confidence": 0.95
+                "query": "Predict air quality for tomorrow"
             }
         }
     )
@@ -202,44 +90,66 @@ class AnalysisRequest(BaseModel):
     Request model for dataset analysis operations.
     
     This model captures the file path of a dataset that needs to be
-    analyzed by the Analytics Agent. The agent will load the file
-    and compute comprehensive statistics.
+    analyzed by the Analytics Agent. The agent loads the file and
+    computes comprehensive statistics and data quality metrics.
     
     Attributes:
         file_path: Path to the dataset file (relative or absolute)
-        
-    Example:
-        >>> request = AnalysisRequest(file_path="datasets/health_data.csv")
-        >>> print(request.file_path)
-        "datasets/health_data.csv"
         
     Supported Formats:
         - CSV (.csv): Comma-separated values with headers
         - JSON (.json): Array of objects or nested structure
         - Parquet (.parquet): Apache Parquet columnar format
-        - Excel (.xlsx): Microsoft Excel spreadsheets
         
-    Validation:
-        - file_path: Non-empty string, max 500 characters
-        - Must contain valid path characters
+    Validation Rules:
+        - file_path: Non-empty string, min 1 char
+        - Cannot be null or empty
     """
     
-    # Path to the dataset file
-    # Can be relative (e.g., "data/sample.csv") or absolute
     file_path: str = Field(
-        ...,  # Required field
+        ...,  # Ellipsis means this field is REQUIRED (no default value)
         min_length=1,
-        max_length=500,
-        pattern=r"^[\w\-/\\. ]+$",  # Basic path validation
-        description="Path to the dataset file for analysis",
-        examples=["datasets/community_health_data.csv"]
+        description="Path to the dataset file for analysis"
     )
     
     model_config: ConfigDict = ConfigDict(
+        # Automatically strip whitespace from strings
         str_strip_whitespace=True,
+        # OpenAPI documentation example
         json_schema_extra={
             "example": {
-                "file_path": "datasets/community_health_data.csv"
+                "file_path": "datasets/sample.csv"
+            }
+        }
+    )
+
+
+# =============================================================================
+# RESPONSE MODELS (Output Schemas)
+# =============================================================================
+# Response models define the structure of API responses for consistent
+# client-side consumption and automatic OpenAPI documentation generation.
+
+
+class RouteResponse(BaseModel):
+    """
+    Response model for query routing decisions.
+    
+    Contains routing information indicating which specialized agent
+    should handle a user query based on domain and intent classification.
+    """
+    domain: Domain
+    intent: Intent
+    target_agent: str
+    confidence: float
+    
+    model_config: ConfigDict = ConfigDict(
+        json_schema_extra={
+            "example": {
+                "domain": "environment",
+                "intent": "prediction",
+                "target_agent": "prediction_agent",
+                "confidence": 0.9
             }
         }
     )
@@ -249,9 +159,9 @@ class AnalysisResponse(BaseModel):
     """
     Response model containing dataset analysis results.
     
-    After the Analytics Agent processes a dataset, this model
-    represents the comprehensive statistical summary including
-    data quality metrics and column type distribution.
+    This model represents a comprehensive statistical summary of a dataset,
+    including dimensions, data quality metrics, column type distribution,
+    and an overall quality score.
     
     Attributes:
         rows: Total number of data rows (excluding header)
@@ -262,77 +172,55 @@ class AnalysisResponse(BaseModel):
         categorical_columns: Number of text/category columns
         data_quality_score: Overall quality score (0.0-100.0)
         
-    Example:
-        >>> response = AnalysisResponse(
-        ...     rows=1000,
-        ...     columns=12,
-        ...     missing_values=14,
-        ...     duplicate_rows=1,
-        ...     numeric_columns=8,
-        ...     categorical_columns=4,
-        ...     data_quality_score=98.5
-        ... )
-        
     Data Quality Score:
-        Score ranges from 0.0 (poor) to 100.0 (excellent).
-        Calculated as weighted average of:
-        - Completeness: (1 - missing_rate) * 40%
-        - Uniqueness: (1 - duplicate_rate) * 30%
-        - Validity: percentage of valid data types * 30%
+        Score from 0.0 (poor) to 100.0 (excellent).
+        Calculated from:
+        - Completeness: Percentage of non-missing values (40% weight)
+        - Uniqueness: Absence of duplicate rows (30% weight)
+        - Validity: Proper data types and formats (30% weight)
     """
     
-    # Dataset dimensions
     rows: int = Field(
         ...,  # Required
-        ge=0,  # Cannot be negative
-        description="Total number of data rows",
-        examples=[1000]
+        ge=0,  # Greater than or equal to 0 (cannot be negative)
+        description="Total number of data rows"
     )
     
     columns: int = Field(
         ...,
         ge=0,
-        description="Total number of columns/features",
-        examples=[12]
+        description="Total number of columns/features"
     )
     
-    # Data quality metrics
     missing_values: int = Field(
         ...,
         ge=0,
-        description="Total count of missing/null values",
-        examples=[14]
+        description="Total count of missing/null values"
     )
     
     duplicate_rows: int = Field(
         ...,
         ge=0,
-        description="Count of exact duplicate rows",
-        examples=[1]
+        description="Count of exact duplicate rows"
     )
     
-    # Column type distribution
     numeric_columns: int = Field(
         ...,
         ge=0,
-        description="Number of numeric columns (int, float)",
-        examples=[8]
+        description="Number of numeric columns (int, float, decimal)"
     )
     
     categorical_columns: int = Field(
         ...,
         ge=0,
-        description="Number of categorical/text columns",
-        examples=[4]
+        description="Number of categorical/text columns"
     )
     
-    # Overall quality assessment
     data_quality_score: float = Field(
         ...,
-        ge=0.0,
-        le=100.0,
-        description="Overall data quality score (0.0-100.0)",
-        examples=[98.5]
+        ge=0.0,  # Must be >= 0.0
+        le=100.0,  # Must be <= 100.0
+        description="Overall data quality score from 0.0 to 100.0"
     )
     
     model_config: ConfigDict = ConfigDict(
