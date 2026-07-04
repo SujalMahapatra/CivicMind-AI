@@ -24,6 +24,8 @@ from api.health import router as health_router
 
 from api.coordinator import router as coordinator_router
 
+from api.analytics import router as analytics_router
+
 
 # =============================================================================
 # FASTAPI APPLICATION INITIALIZATION
@@ -91,6 +93,12 @@ app.include_router(
     prefix="/api/v1",
     tags=["Coordinator"]
 )
+
+app.include_router(
+    analytics_router,
+    prefix="/api/v1"
+)
+
 # =============================================================================
 # ROOT ENDPOINT
 # =============================================================================
