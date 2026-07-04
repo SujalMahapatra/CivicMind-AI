@@ -195,3 +195,156 @@ class RouteResponse(BaseModel):
             }
         }
     )
+
+
+class AnalysisRequest(BaseModel):
+    """
+    Request model for dataset analysis operations.
+    
+    This model captures the file path of a dataset that needs to be
+    analyzed by the Analytics Agent. The agent will load the file
+    and compute comprehensive statistics.
+    
+    Attributes:
+        file_path: Path to the dataset file (relative or absolute)
+        
+    Example:
+        >>> request = AnalysisRequest(file_path="datasets/health_data.csv")
+        >>> print(request.file_path)
+        "datasets/health_data.csv"
+        
+    Supported Formats:
+        - CSV (.csv): Comma-separated values with headers
+        - JSON (.json): Array of objects or nested structure
+        - Parquet (.parquet): Apache Parquet columnar format
+        - Excel (.xlsx): Microsoft Excel spreadsheets
+        
+    Validation:
+        - file_path: Non-empty string, max 500 characters
+        - Must contain valid path characters
+    """
+    
+    # Path to the dataset file
+    # Can be relative (e.g., "data/sample.csv") or absolute
+    file_path: str = Field(
+        ...,  # Required field
+        min_length=1,
+        max_length=500,
+        pattern=r"^[\w\-/\\. ]+$",  # Basic path validation
+        description="Path to the dataset file for analysis",
+        examples=["datasets/community_health_data.csv"]
+    )
+    
+    model_config: ConfigDict = ConfigDict(
+        str_strip_whitespace=True,
+        json_schema_extra={
+            "example": {
+                "file_path": "datasets/community_health_data.csv"
+            }
+        }
+    )
+
+
+class AnalysisResponse(BaseModel):
+    """
+    Response model containing dataset analysis results.
+    
+    After the Analytics Agent processes a dataset, this model
+    represents the comprehensive statistical summary including
+    data quality metrics and column type distribution.
+    
+    Attributes:
+        rows: Total number of data rows (excluding header)
+        columns: Total number of columns/features
+        missing_values: Total count of null/empty cells
+        duplicate_rows: Count of exact duplicate rows
+        numeric_columns: Number of numeric data type columns
+        categorical_columns: Number of text/category columns
+        data_quality_score: Overall quality score (0.0-100.0)
+        
+    Example:
+        >>> response = AnalysisResponse(
+        ...     rows=1000,
+        ...     columns=12,
+        ...     missing_values=14,
+        ...     duplicate_rows=1,
+        ...     numeric_columns=8,
+        ...     categorical_columns=4,
+        ...     data_quality_score=98.5
+        ... )
+        
+    Data Quality Score:
+        Score ranges from 0.0 (poor) to 100.0 (excellent).
+        Calculated as weighted average of:
+        - Completeness: (1 - missing_rate) * 40%
+        - Uniqueness: (1 - duplicate_rate) * 30%
+        - Validity: percentage of valid data types * 30%
+    """
+    
+    # Dataset dimensions
+    rows: int = Field(
+        ...,  # Required
+        ge=0,  # Cannot be negative
+        description="Total number of data rows",
+        examples=[1000]
+    )
+    
+    columns: int = Field(
+        ...,
+        ge=0,
+        description="Total number of columns/features",
+        examples=[12]
+    )
+    
+    # Data quality metrics
+    missing_values: int = Field(
+        ...,
+        ge=0,
+        description="Total count of missing/null values",
+        examples=[14]
+    )
+    
+    duplicate_rows: int = Field(
+        ...,
+        ge=0,
+        description="Count of exact duplicate rows",
+        examples=[1]
+    )
+    
+    # Column type distribution
+    numeric_columns: int = Field(
+        ...,
+        ge=0,
+        description="Number of numeric columns (int, float)",
+        examples=[8]
+    )
+    
+    categorical_columns: int = Field(
+        ...,
+        ge=0,
+        description="Number of categorical/text columns",
+        examples=[4]
+    )
+    
+    # Overall quality assessment
+    data_quality_score: float = Field(
+        ...,
+        ge=0.0,
+        le=100.0,
+        description="Overall data quality score (0.0-100.0)",
+        examples=[98.5]
+    )
+    
+    model_config: ConfigDict = ConfigDict(
+        json_schema_extra={
+            "example": {
+                "rows": 1000,
+                "columns": 12,
+                "missing_values": 14,
+                "duplicate_rows": 1,
+                "numeric_columns": 8,
+                "categorical_columns": 4,
+                "data_quality_score": 98.5
+            }
+        }
+    )
