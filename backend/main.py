@@ -22,7 +22,7 @@ from fastapi.responses import JSONResponse
 from config import settings
 from api.health import router as health_router
 
-
+from api.coordinator import router as coordinator_router
 
 
 # =============================================================================
@@ -86,6 +86,11 @@ app.include_router(
 )
 
 
+app.include_router(
+    coordinator_router,
+    prefix="/api/v1",
+    tags=["Coordinator"]
+)
 # =============================================================================
 # ROOT ENDPOINT
 # =============================================================================
