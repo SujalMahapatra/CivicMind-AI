@@ -46,6 +46,7 @@ from sentence_transformers import SentenceTransformer
 
 from services.gemini_service import (
     gemini_service,
+    GeminiService
 )
 
 from .schemas import (
