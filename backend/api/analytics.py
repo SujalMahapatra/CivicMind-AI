@@ -40,16 +40,21 @@ from pathlib import Path
 
 from fastapi import APIRouter, HTTPException, status
 from fastapi.responses import JSONResponse
-from flask import app
+
 
 from agents.analytics.schemas import (
-    AnalysisRequest,
     AnalysisResponse,
 )
 
 from agents.analytics.analytics_agent import (
     AnalyticsAgent,
 )
+
+from fastapi import UploadFile, File
+
+from pathlib import Path
+import shutil
+
 
 
 
@@ -101,178 +106,80 @@ analytics_agent: AnalyticsAgent = AnalyticsAgent()
     response_model=AnalysisResponse,
     response_class=JSONResponse,
     status_code=status.HTTP_200_OK,
-    summary="Analyze a dataset and return statistics",
-    description="""
-    Performs comprehensive analysis on a dataset file.
-    
-    The Analytics Agent:
-    1. Validates the file exists at the specified path
-    2. Loads the dataset (supports CSV, JSON, Parquet formats)
-    3. Calculates row/column counts
-    4. Identifies numeric vs categorical columns
-    5. Counts missing values and duplicate rows
-    6. Computes an overall data quality score
-    
-    The data quality score (0-100) considers:
-    - Completeness: Percentage of non-missing values
-    - Uniqueness: Absence of duplicate rows
-    - Validity: Proper data types in each column
-    
-    If the file cannot be found or has invalid format, appropriate
-    HTTP errors are returned with descriptive messages.
-    """,
-    response_description="""
-    Comprehensive dataset analysis including:
-    - Dataset dimensions (rows, columns)
-    - Data quality metrics (missing values, duplicates)
-    - Column type distribution
-    - Overall data quality score
-    """,
+    summary="Analyze uploaded dataset",
+    description="Upload a dataset file and return analysis results."
 )
-async def analyze_dataset(request: AnalysisRequest) -> AnalysisResponse:
+async def analyze_dataset(
+    file: UploadFile = File(...)
+) -> AnalysisResponse:
     """
-    Analyze a dataset file and return statistical summary.
-    
-    This endpoint is the primary interface for data analysis in CivicMind AI.
-    It accepts a file path to a dataset and returns comprehensive statistics
-    useful for understanding data quality and structure.
-    
-    Args:
-        request: AnalysisRequest containing:
-            - file_path: Path to the dataset file (relative to project root)
-            
-    Returns:
-        AnalysisResponse containing:
-            - rows: Total number of data rows
-            - columns: Total number of columns
-            - missing_values: Count of missing cells
-            - duplicate_rows: Count of duplicate rows
-            - numeric_columns: Count of numeric columns
-            - categorical_columns: Count of categorical/text columns
-            - data_quality_score: Overall quality (0.0-100.0)
-            
-    Raises:
-        HTTPException: 
-            - 400: File path is invalid or not a string
-            - 404: File does not exist at path
-            - 422: File exists but has malformed data
-            - 500: Analysis computation failed unexpectedly
-            
-    Example Request:
-        {
-            "file_path": "datasets/community_health_data.csv"
-        }
-        
-    Example Success Response:
-        {
-            "rows": 12500,
-            "columns": 18,
-            "missing_values": 45,
-            "duplicate_rows": 2,
-            "numeric_columns": 12,
-            "categorical_columns": 6,
-            "data_quality_score": 98.2
-        }
-        
-    Supported File Formats:
-        - CSV (.csv): Comma-separated values
-        - JSON (.json): JavaScript Object Notation
-        - Parquet (.parquet): Apache Parquet format
-        - Excel (.xlsx): Microsoft Excel (if openpyxl installed)
-        
-    Data Quality Score Calculation:
-        score = (completeness * 0.4) + (uniqueness * 0.3) + (validity * 0.3)
-        
-        Where:
-        - completeness = 100 - (% of missing values)
-        - uniqueness = 100 - (% of duplicate rows)
-        - validity = percentage of columns with correct types
+    Analyze an uploaded dataset.
+
+    Supported formats:
+    - CSV (.csv)
+    - JSON (.json)
+    - Excel (.xlsx)
+
+    Workflow:
+    1. Receive uploaded file
+    2. Save temporarily in uploads/
+    3. Pass file path to AnalyticsAgent
+    4. Return analysis results
     """
-    file_path: str = request.file_path
-    
-    # =============================================================================
-    # INPUT VALIDATION
-    # =============================================================================
-    # Step 1: Validate file path is not empty
-    if not file_path or not file_path.strip():
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="File path cannot be empty"
-        )
-    
-    # Step 2: Validate file path is a string (Pydantic handles this, but defensive)
-    if not isinstance(file_path, str):
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"File path must be a string, got {type(file_path).__name__}"
-        )
-    
-    # Step 3: Convert to Path object and validate
-    # Path validates the file system path and handles different OS path formats
+
     try:
-        path_obj = Path(file_path)
-    except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Invalid file path format: {str(e)}"
+        # ---------------------------------------------------------------------
+        # Validate uploaded file
+        # ---------------------------------------------------------------------
+        if not file.filename:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="No file uploaded"
+            )
+
+        # ---------------------------------------------------------------------
+        # Create uploads directory
+        # ---------------------------------------------------------------------
+        uploads_dir = Path("uploads")
+        uploads_dir.mkdir(exist_ok=True)
+
+        # ---------------------------------------------------------------------
+        # Save uploaded file
+        # ---------------------------------------------------------------------
+        file_path = uploads_dir / file.filename
+
+        with open(file_path, "wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
+
+        # ---------------------------------------------------------------------
+        # Run analysis
+        # ---------------------------------------------------------------------
+        result = analytics_agent.analyze(
+            str(file_path)
         )
-    
-    # Step 4: Check file exists
-    if not path_obj.exists():
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Dataset file not found: '{file_path}'"
-        )
-    
-    # Step 5: Verify it's a file (not a directory)
-    if not path_obj.is_file():
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Path is not a file: '{file_path}'"
-        )
-    
-    # =============================================================================
-    # DATA ANALYSIS
-    # =============================================================================
-    try:
-        # Delegate analysis to the Analytics Agent
-        # The agent encapsulates the analysis logic and handles various file formats
-        analysis_result = analytics_agent.analyze(
-            request.file_path
-        )
-        
-        return analysis_result
-        
-    except FileNotFoundError:
-        # Should not reach here due to validation above, but defensive coding
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Dataset file not accessible: '{file_path}'"
-        )
-        
+
+        return result
+
     except ValueError as e:
-        # Raised for malformed data (e.g., corrupted CSV, invalid JSON)
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail=f"Dataset validation failed: {str(e)}"
+            detail=str(e)
         )
-        
+
     except PermissionError:
-        # Raised if file exists but no read permissions
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail=f"Permission denied reading file: '{file_path}'"
+            detail="Permission denied while reading uploaded file"
         )
-        
+
     except Exception as e:
-        # Catch-all for unexpected errors
-        # In production, log this to an error tracking service (Sentry, etc.)
         print(f"Unexpected error analyzing dataset: {e}")
-        
+
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Analysis failed unexpectedly. Please try again or contact support."
+            detail="Dataset analysis failed"
         )
+
 
 
 # =============================================================================
