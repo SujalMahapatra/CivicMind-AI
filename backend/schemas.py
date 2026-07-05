@@ -351,3 +351,95 @@ class InsightResponse(BaseModel):
             }
         }
     )
+
+
+class RecommendationRequest(BaseModel):
+    """
+    Request model for generating actionable recommendations.
+    
+    The RecommendationRequest encapsulates insights from the Insight Agent
+    that need to be converted into specific, actionable recommendations
+    for community stakeholders and decision-makers.
+    
+    Attributes:
+        domain: Subject domain (health, environment, mobility)
+        insights: AI-generated insights including findings, risks, trends, impact
+        
+    Usage:
+        >>> request = RecommendationRequest(
+        ...     domain=Domain.environment,
+        ...     insights="Air quality declining. AQI forecast to reach 120."
+        ... )
+    """
+    
+    domain: Domain = Field(
+        ...,  # Required
+        description="Subject domain for recommendations (health, environment, mobility)"
+    )
+    
+    insights: str = Field(
+        ...,  # Required
+        min_length=1,
+        max_length=50000,
+        description="AI-generated insights to convert into recommendations"
+    )
+    
+    model_config: ConfigDict = ConfigDict(
+        use_enum_values=True,
+        json_schema_extra={
+            "example": {
+                "domain": "environment",
+                "insights": "Air quality declining. AQI forecast to reach 120. Community health impact expected."
+            }
+        }
+    )
+
+
+class RecommendationResponse(BaseModel):
+    """
+    Response model containing actionable recommendations.
+    
+    The Recommendation Agent converts insights into three categories of
+    recommendations covering immediate response, preventive measures, and
+    long-term strategic planning.
+    
+    Attributes:
+        immediate_actions: Steps to take right now
+        preventive_actions: Steps to prevent problems
+        long_term_actions: Strategic initiatives
+        model_used: Gemini model version
+    """
+    
+    immediate_actions: str = Field(
+        ...,  # Required
+        min_length=1,
+        description="Immediate response actions (what to do now)"
+    )
+    
+    preventive_actions: str = Field(
+        ...,  # Required
+        min_length=1,
+        description="Preventive actions (how to stop problems before they start)"
+    )
+    
+    long_term_actions: str = Field(
+        ...,  # Required
+        min_length=1,
+        description="Long-term strategic actions (sustainable solutions)"
+    )
+    
+    model_used: str = Field(
+        "gemini-2.5-flash",
+        description="Gemini model version used"
+    )
+    
+    model_config: ConfigDict = ConfigDict(
+        json_schema_extra={
+            "example": {
+                "immediate_actions": "Issue air quality alerts. Recommend N95 masks. Postpone outdoor events.",
+                "preventive_actions": "Increase public transit subsidies. Establish car-free zones. Plant green buffers.",
+                "long_term_actions": "Transition to electric buses. Build urban forests. Implement congestion pricing.",
+                "model_used": "gemini-2.5-flash"
+            }
+        }
+    )
