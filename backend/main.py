@@ -34,6 +34,7 @@ from api.recommendation import (
     router as recommendation_router
 )
 
+from api.rag import router as rag_router
 # =============================================================================
 # FASTAPI APPLICATION INITIALIZATION
 # =============================================================================
@@ -119,6 +120,11 @@ app.include_router(
 
 app.include_router(
     recommendation_router,
+    prefix="/api/v1"
+)
+
+app.include_router(
+    rag_router,
     prefix="/api/v1"
 )
 
