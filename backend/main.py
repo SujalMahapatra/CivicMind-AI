@@ -28,6 +28,12 @@ from api.analytics import router as analytics_router
 
 from api.prediction import router as prediction_router
 
+from api.insight import router as insight_router
+
+from api.recommendation import (
+    router as recommendation_router
+)
+
 # =============================================================================
 # FASTAPI APPLICATION INITIALIZATION
 # =============================================================================
@@ -103,6 +109,16 @@ app.include_router(
 
 app.include_router(
     prediction_router,
+    prefix="/api/v1"
+)
+
+app.include_router(
+    insight_router,
+    prefix="/api/v1"
+)
+
+app.include_router(
+    recommendation_router,
     prefix="/api/v1"
 )
 
