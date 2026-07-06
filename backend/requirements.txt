@@ -23,3 +23,7 @@ reportlab
 requests
 
 pydantic-settings
+
+chromadb
+
+google-generativeai
