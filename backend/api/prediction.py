@@ -39,10 +39,13 @@ from agents.prediction.prediction_agent import PredictionAgent
 
 # Request and Response schemas
 from agents.prediction.schemas import (
-    PredictionRequest,
+    
     PredictionResponse
 )
+from fastapi import UploadFile, File, Form
 
+import shutil
+from pathlib import Path
 # =============================================================================
 # ROUTER INITIALIZATION
 # =============================================================================
@@ -85,7 +88,9 @@ prediction_agent = PredictionAgent()
     )
 )
 async def forecast(
-    request: PredictionRequest
+    file: UploadFile = File(...),
+    target_column: str = Form(...),
+    forecast_days: int = Form(...)
 ) -> PredictionResponse:
     """
     Generate future forecasts from historical data.
@@ -136,12 +141,22 @@ async def forecast(
     """
 
     try:
+
+        # Save the uploaded file to a temporary location
+        uploads_dir = Path("uploads")
+        uploads_dir.mkdir(exist_ok=True)
+
+        file_path = uploads_dir / file.filename
+
+        with open(file_path, "wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
+
         # Delegate forecasting logic to Prediction Agent.
         # The router only handles HTTP concerns.
         return prediction_agent.predict(
-            file_path=request.file_path,
-            target_column=request.target_column,
-            forecast_days=request.forecast_days
+            file_path=str(file_path),
+            target_column=target_column,
+            forecast_days=forecast_days
         )
 
     except Exception as e:

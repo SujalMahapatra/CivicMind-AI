@@ -76,7 +76,11 @@ class PredictionAgent:
             raise ValueError(
                 f"Target column '{target_column}' must be numeric"
             )
-        
+        if df[target_column].isnull().any():
+            raise ValueError(
+                f"Target column '{target_column}' contains missing values"
+            )
+
         y = df[target_column].values
 
         X = np.arange(len(y)).reshape(-1, 1)
@@ -141,7 +145,7 @@ class PredictionAgent:
                 target_column
             )
 
-            model = self.train_model(X, y)
+            model, r2_score = self.train_model(X, y)
 
             predictions = self.predict_future(
                 model,
@@ -149,17 +153,18 @@ class PredictionAgent:
                 forecast_days
             )
             if predictions[-1] > predictions[0]:
-                trend = "Increasing"
+                trend_direction = "Increasing"
             elif predictions[-1] < predictions[0]:
-                trend = "Decreasing"
+                trend_direction = "Decreasing"
             else:
-                trend = "Stable"
+                trend_direction = "Stable"
 
             return PredictionResponse(
                 file_name=Path(file_path).name,
                 target_column=target_column,
                 forecast_days=forecast_days,
                 predictions=predictions,
-                trend=trend,
-                model_used="LinearRegression"
+                trend_direction=trend_direction,
+                model_used="LinearRegression",
+                r2_score=r2_score
             )

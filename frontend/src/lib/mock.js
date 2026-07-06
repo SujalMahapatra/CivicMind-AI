@@ -90,11 +90,31 @@ export const AGENTS = [
 ];
 
 export const TECH_STACK = [
-  { name: "FastAPI",  tag: "Backend framework",    color: "text-emerald-300" },
-  { name: "React",    tag: "Frontend UI",           color: "text-sky-300" },
-  { name: "Gemini",   tag: "LLM reasoning",         color: "text-indigo-300" },
-  { name: "ChromaDB", tag: "Vector store",          color: "text-violet-300" },
-  { name: "Sentence Transformers", tag: "Embeddings", color: "text-cyan-300" },
+  {
+    name: "FastAPI",
+    tag: "Backend API",
+    color: "text-green-400"
+  },
+  {
+    name: "Gemini 2.5",
+    tag: "LLM Engine",
+    color: "text-blue-400"
+  },
+  {
+    name: "ChromaDB",
+    tag: "Vector Store",
+    color: "text-purple-400"
+  },
+  {
+    name: "React",
+    tag: "Frontend",
+    color: "text-cyan-400"
+  },
+  {
+    name: "Scikit-Learn",
+    tag: "Forecasting",
+    color: "text-orange-400"
+  }
 ];
 
 export const SAMPLE_DATASET = {
@@ -104,12 +124,12 @@ export const SAMPLE_DATASET = {
   size: "1.9 MB",
   columns: ["ticket_id", "district", "category", "priority", "reported_at", "resolved_at", "resolution_hours", "satisfaction"],
   preview: [
-    ["CS-10241", "North",   "Sanitation",      "High",   "2024-01-04", "2024-01-05", 26.4, 4.1],
+    ["CS-10241", "North", "Sanitation", "High", "2024-01-04", "2024-01-05", 26.4, 4.1],
     ["CS-10242", "Central", "Roads & Traffic", "Medium", "2024-01-04", "2024-01-06", 44.1, 3.6],
-    ["CS-10243", "East",    "Water Supply",    "High",   "2024-01-05", "2024-01-05", 8.2,  4.8],
-    ["CS-10244", "South",   "Street Lighting", "Low",    "2024-01-05", "2024-01-09", 96.7, 3.1],
-    ["CS-10245", "North",   "Sanitation",      "High",   "2024-01-06", "2024-01-07", 22.9, 4.4],
-    ["CS-10246", "West",    "Parks",           "Low",    "2024-01-06", "2024-01-11", 118.3, 3.0],
+    ["CS-10243", "East", "Water Supply", "High", "2024-01-05", "2024-01-05", 8.2, 4.8],
+    ["CS-10244", "South", "Street Lighting", "Low", "2024-01-05", "2024-01-09", 96.7, 3.1],
+    ["CS-10245", "North", "Sanitation", "High", "2024-01-06", "2024-01-07", 22.9, 4.4],
+    ["CS-10246", "West", "Parks", "Low", "2024-01-06", "2024-01-11", 118.3, 3.0],
   ],
 };
 
@@ -118,21 +138,21 @@ export const ANALYSIS_RESULTS = {
   metrics: [
     { label: "Records analyzed", value: "12,480" },
     { label: "Median resolution", value: "26.4h" },
-    { label: "SLA breach rate",   value: "18.2%" },
+    { label: "SLA breach rate", value: "18.2%" },
     { label: "Avg. satisfaction", value: "3.8 / 5" },
   ],
   distribution: [
-    { name: "Sanitation",       value: 34 },
-    { name: "Roads & Traffic",  value: 22 },
-    { name: "Street Lighting",  value: 14 },
-    { name: "Water Supply",     value: 12 },
-    { name: "Parks",            value:  9 },
-    { name: "Other",            value:  9 },
+    { name: "Sanitation", value: 34 },
+    { name: "Roads & Traffic", value: 22 },
+    { name: "Street Lighting", value: 14 },
+    { name: "Water Supply", value: 12 },
+    { name: "Parks", value: 9 },
+    { name: "Other", value: 9 },
   ],
   anomalies: [
     { where: "South district — Street Lighting", detail: "SLA breach rate 3.1× the citywide average.", severity: "high" },
-    { where: "West district — Parks",            detail: "Median resolution 118h — outlier vs 26h median.", severity: "medium" },
-    { where: "Central — Roads & Traffic",        detail: "Volume spike +38% over trailing 30 days.",       severity: "medium" },
+    { where: "West district — Parks", detail: "Median resolution 118h — outlier vs 26h median.", severity: "medium" },
+    { where: "Central — Roads & Traffic", detail: "Volume spike +38% over trailing 30 days.", severity: "medium" },
   ],
 };
 
@@ -201,10 +221,10 @@ export const RECOMMENDATIONS = [
 ];
 
 export const ACTION_CATEGORIES = [
-  { key: "Operations",    color: "text-indigo-300", bg: "bg-indigo-500/10", ring: "ring-indigo-500/30" },
-  { key: "Infrastructure",color: "text-cyan-300",   bg: "bg-cyan-500/10",   ring: "ring-cyan-500/30" },
-  { key: "Transparency",  color: "text-emerald-300",bg: "bg-emerald-500/10",ring: "ring-emerald-500/30" },
-  { key: "Automation",    color: "text-violet-300", bg: "bg-violet-500/10", ring: "ring-violet-500/30" },
+  { key: "Operations", color: "text-indigo-300", bg: "bg-indigo-500/10", ring: "ring-indigo-500/30" },
+  { key: "Infrastructure", color: "text-cyan-300", bg: "bg-cyan-500/10", ring: "ring-cyan-500/30" },
+  { key: "Transparency", color: "text-emerald-300", bg: "bg-emerald-500/10", ring: "ring-emerald-500/30" },
+  { key: "Automation", color: "text-violet-300", bg: "bg-violet-500/10", ring: "ring-violet-500/30" },
 ];
 
 export const KNOWLEDGE_SUGGESTIONS = [
@@ -222,9 +242,9 @@ export function mockKnowledgeAnswer(question) {
       answer:
         "Based on indexed civic reports and last quarter's ticket data, the top three priorities are: (1) closing the sanitation SLA gap in North and Central districts, (2) resolving chronic street-lighting failures in South wards 7, 9, and 12, and (3) publishing a district-level SLA dashboard to reduce repeat tickets. These are ranked by projected impact on citizen satisfaction and by breach severity.",
       sources: [
-        { title: "Q4 Civic Service Report",       page: 14, ref: "civic-q4.pdf#p14" },
-        { title: "SLA Policy — Master Document",  page: 3,  ref: "sla-policy.md#sec-3" },
-        { title: "District Comparative Study",    page: 22, ref: "district-study.pdf#p22" },
+        { title: "Q4 Civic Service Report", page: 14, ref: "civic-q4.pdf#p14" },
+        { title: "SLA Policy — Master Document", page: 3, ref: "sla-policy.md#sec-3" },
+        { title: "District Comparative Study", page: 22, ref: "district-study.pdf#p22" },
       ],
     };
   }
@@ -233,8 +253,8 @@ export function mockKnowledgeAnswer(question) {
       answer:
         "The Sanitation SLA for the North district mandates first response within 12 hours and full resolution within 36 hours for High-priority tickets. Current performance shows a median resolution of 22.9 hours (within SLA) but a breach rate of 41% concentrated in two collection zones. The policy also requires weekly reporting to the district commissioner.",
       sources: [
-        { title: "SLA Policy — Sanitation Annex", page: 7,  ref: "sla-policy.md#sanitation" },
-        { title: "North District Ops Handbook",  page: 12, ref: "north-ops.pdf#p12" },
+        { title: "SLA Policy — Sanitation Annex", page: 7, ref: "sla-policy.md#sanitation" },
+        { title: "North District Ops Handbook", page: 12, ref: "north-ops.pdf#p12" },
       ],
     };
   }
@@ -243,8 +263,8 @@ export function mockKnowledgeAnswer(question) {
       answer:
         "Street lighting outcomes are worst in South wards 7, 9, and 12, where median resolution consistently exceeds 96 hours — 3.1× the citywide average. Root-cause analysis in the Q3 Infrastructure Report attributes this to aging circuit infrastructure and a single overloaded field team.",
       sources: [
-        { title: "Q3 Infrastructure Report",  page: 9,  ref: "infra-q3.pdf#p9" },
-        { title: "Field Ops Load Analysis",   page: 4,  ref: "field-load.md#p4" },
+        { title: "Q3 Infrastructure Report", page: 9, ref: "infra-q3.pdf#p9" },
+        { title: "Field Ops Load Analysis", page: 4, ref: "field-load.md#p4" },
       ],
     };
   }
@@ -253,7 +273,7 @@ export function mockKnowledgeAnswer(question) {
       answer:
         "Compared to peer cities of similar population size, our median resolution time (26.4h) is 12% better, but our SLA breach rate (18.2%) is 4 points worse — indicating good average performance but poor tail-risk handling. Peer cities that published public SLA dashboards saw an average +0.4 CSAT lift within six months.",
       sources: [
-        { title: "Peer City Benchmark 2024",       page: 6,  ref: "benchmark.pdf#p6" },
+        { title: "Peer City Benchmark 2024", page: 6, ref: "benchmark.pdf#p6" },
         { title: "Transparency & CSAT Meta-study", page: 18, ref: "meta-study.pdf#p18" },
       ],
     };
@@ -262,7 +282,7 @@ export function mockKnowledgeAnswer(question) {
     answer:
       "I've searched the indexed civic knowledge base for that question. Based on the most relevant documents, the CivicMind agents recommend cross-referencing the latest Analytics run and the SLA Policy master document. Ask me anything more specific about districts, categories, SLAs, or forecasts and I'll ground my answer in citations.",
     sources: [
-      { title: "Civic Knowledge Base — Index",  page: 1, ref: "kb-index.md" },
+      { title: "Civic Knowledge Base — Index", page: 1, ref: "kb-index.md" },
       { title: "SLA Policy — Master Document", page: 1, ref: "sla-policy.md#p1" },
     ],
   };

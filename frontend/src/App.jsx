@@ -2,13 +2,13 @@ import React, { useState } from "react";
 import "@/App.css";
 import { Sidebar } from "@/components/civic/Sidebar";
 import { Header } from "@/components/civic/Header";
-import OverviewWorkspace from "@/components/workspaces/OverviewWorkspace";
-import AnalyticsWorkspace from "@/components/workspaces/AnalyticsWorkspace";
-import PredictionWorkspace from "@/components/workspaces/PredictionWorkspace";
-import InsightWorkspace from "@/components/workspaces/InsightWorkspace";
-import RecommendationWorkspace from "@/components/workspaces/RecommendationWorkspace";
-import KnowledgeWorkspace from "@/components/workspaces/KnowledgeWorkspace";
-import ArchitectureWorkspace from "@/components/workspaces/ArchitectureWorkspace";
+import OverviewWorkspace from "@/components/workspaces/Overview_Workspace";
+import AnalyticsWorkspace from "@/components/workspaces/Analytics_Workspace";
+import PredictionWorkspace from "@/components/workspaces/Prediction_Workspace";
+import InsightsWorkspace from "@/components/workspaces/Insights_Workspace";
+import RecommendationWorkspace from "@/components/workspaces/Recommendation_Workspace";
+import KnowledgeWorkspace from "@/components/workspaces/Knowledge_Workspace";
+import ArchitectureWorkspace from "@/components/workspaces/Architecture_Workspace";
 import { Toaster } from "@/components/ui/sonner";
 
 function App() {
