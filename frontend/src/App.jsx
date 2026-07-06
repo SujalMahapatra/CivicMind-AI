@@ -5,7 +5,7 @@ import { Header } from "@/components/civic/Header";
 import OverviewWorkspace from "@/components/workspaces/Overview_Workspace";
 import AnalyticsWorkspace from "@/components/workspaces/Analytics_Workspace";
 import PredictionWorkspace from "@/components/workspaces/Prediction_Workspace";
-import InsightsWorkspace from "@/components/workspaces/Insights_Workspace";
+import InsightWorkspace from "@/components/workspaces/Insights_Workspace";
 import RecommendationWorkspace from "@/components/workspaces/Recommendation_Workspace";
 import KnowledgeWorkspace from "@/components/workspaces/Knowledge_Workspace";
 import ArchitectureWorkspace from "@/components/workspaces/Architecture_Workspace";

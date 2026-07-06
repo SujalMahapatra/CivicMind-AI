@@ -34,4 +34,4 @@ export const TypeWriter = ({ text = "", speed = 12, className, onDone }) => {
   );
 };
 
-export default Typeriter;
+export default TypeWriter;

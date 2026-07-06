@@ -35,6 +35,7 @@ from api.recommendation import (
 )
 
 from api.rag import router as rag_router
+from fastapi.middleware.cors import CORSMiddleware
 # =============================================================================
 # FASTAPI APPLICATION INITIALIZATION
 # =============================================================================
@@ -75,6 +76,16 @@ app = FastAPI(
     redoc_url="/redoc" if settings.DEBUG else None,
 )
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # =============================================================================
 # ROUTER REGISTRATION

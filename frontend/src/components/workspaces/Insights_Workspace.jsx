@@ -7,9 +7,6 @@ import api from "@/services/api";
 
 const INSIGHT_TAGS = ["sanitation", "street-lighting", "north-district", "south-district", "sla-breach"];
 
-useEffect(() => {
-    generateInsight();
-}, []);
 export const InsightWorkspace = () => {
     const [runId, setRunId] = useState(0);
     const [copied, setCopied] = useState(false);
@@ -18,6 +15,11 @@ export const InsightWorkspace = () => {
     const [loading, setLoading] = useState(false);
 
     const [modelUsed, setModelUsed] = useState("");
+
+
+    useEffect(() => {
+        generateInsight();
+    }, []);
 
     const generateInsight = async () => {
         try {
@@ -40,11 +42,16 @@ export const InsightWorkspace = () => {
                 response.data.insights
             );
 
+            localStorage.setItem(
+                "latest_insight",
+                response.data.insights
+            );
+
             setModelUsed(
                 response.data.model_used
             );
 
-            onClick = { generateInsight }
+            
 
         } catch (error) {
             console.error(
@@ -106,7 +113,7 @@ export const InsightWorkspace = () => {
                             data-testid="insight-body"
                             className="relative rounded-xl border border-white/[0.06] bg-white/[0.02] p-6 border-l-2 border-l-indigo-500/60"
                         >
-                            <Typewriter
+                            <TypeWriter
                                 text={
                                     insightText ||
                                     "Generating AI insights..."
