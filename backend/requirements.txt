@@ -27,3 +27,4 @@ pydantic-settings
 chromadb
 
 google-generativeai
+

@@ -34,7 +34,7 @@ from api.recommendation import (
     router as recommendation_router
 )
 
-from api.rag import router as rag_router
+#from api.rag import router as rag_router
 from fastapi.middleware.cors import CORSMiddleware
 # =============================================================================
 # FASTAPI APPLICATION INITIALIZATION
